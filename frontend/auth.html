@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication</title>
+
+    <style>
+        :root {
+            --bg:           #0f1117;
+            --surface:      #181c27;
+            --surface-2:    #1f2436;
+            --border:       #2a2f45;
+            --text:         #e8eaf0;
+            --text-muted:   #7880a0;
+            --accent:       #6366f1;
+            --accent-hover: #4f52d4;
+            --danger:       #e05c5c;
+            --success:      #4caf84;
+
+            --radius:       10px;
+            --radius-sm:    6px;
+            --shadow:       0 2px 12px rgba(0,0,0,.4);
+
+            --font-body:    "Inter", system-ui, sans-serif;
+            --font-mono:    "JetBrains Mono", "Fira Code", monospace;
+        }
+    
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background:  var(--bg);
+            color:       var(--text);
+            line-height: 1.6;
+            min-height:  100vh;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: var(--surface-2);
+            border: none;
+            border-radius: 14px;
+            color:var(--text)
+        }
+
+        button{
+            background: var(--accent);
+        }
+
+        button:hover{
+            background: var(--accent-hover);
+        }
+
+        #message {
+            margin-top: 10px;
+            color: var(--danger);
+        }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: -.01em;
+            color: var(--text);
+        }
+        .topbar-logo span { color: var(--accent); }
+        a {
+        color: var(--accent);
+        text-decoration: none;
+        }
+        a:hover { text-decoration: underline; }
+        #login-container{
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+        }
+    </style>
+</head>
+
+<body>
+<header class="topbar">
+    <a class="topbar-logo" href="/">Project<span>Hub</span></a>
+</header>
+<div id="login-container">
+    <h2>Login / Register</h2>
+
+    <input id="username" type="text" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="sendAuth('/auth/login')">Login</button>
+    <button onclick="sendAuth('/auth/register')">Register</button>
+
+    <div id="message"></div>
+</div>
+<script>
+async function sendAuth(endpoint) {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    const message = document.getElementById("message");
+
+    message.textContent = "";
+
+    try {
+        const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success === true) {
+            window.location.href = "/";
+        } else {
+            message.textContent = data.cause || "Unknown error";
+        }
+
+    } catch (error) {
+        message.textContent = "Connection error";
+        console.error(error);
+    }
+}
+</script>
+
+</body>
+</html>

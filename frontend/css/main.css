@@ -1,0 +1,935 @@
+/* ============================================================
+   Design tokens
+   ============================================================ */
+:root {
+    --bg:           #0f1117;
+    --surface:      #181c27;
+    --surface-2:    #1f2436;
+    --border:       #2a2f45;
+    --text:         #e8eaf0;
+    --text-muted:   #7880a0;
+    --accent:       #6366f1;
+    --accent-hover: #4f52d4;
+    --danger:       #e05c5c;
+    --success:      #4caf84;
+
+    --radius:       10px;
+    --radius-sm:    6px;
+    --shadow:       0 2px 12px rgba(0,0,0,.4);
+
+    --font-body:    "Inter", system-ui, sans-serif;
+    --font-mono:    "JetBrains Mono", "Fira Code", monospace;
+}
+
+/* ============================================================
+   Reset & base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: var(--font-body);
+    background:  var(--bg);
+    color:       var(--text);
+    line-height: 1.6;
+    min-height:  100vh;
+}
+
+/* Applied while the Settings modal is open, so the project page behind it
+   can't be scrolled. */
+body.modal-open { overflow: hidden; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+p.loading, p.error {
+    color: var(--text-muted);
+    padding: 2rem;
+    text-align: center;
+}
+p.error { color: var(--danger); }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* ============================================================
+   Layout
+   ============================================================ */
+.page-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+/* ============================================================
+   Topbar
+   ============================================================ */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.topbar-logo {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: -.01em;
+    color: var(--text);
+}
+.topbar-logo span { color: var(--accent); }
+
+#logout-btn {
+    background: transparent;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+#logout-btn:hover {
+    background: #dc3545;
+    color: white;
+}
+
+#login-information{
+    display: flex;
+    gap: 7px;
+    align-items: center;
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .5rem 1rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    font: inherit;
+    font-size: .875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s, opacity .15s;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
+}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:disabled { opacity: .5; cursor: default; }
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: .875rem;
+    cursor: pointer;
+    padding: .25rem .35rem;
+    border-radius: var(--radius-sm);
+    transition: background .15s, color .15s;
+    line-height: 1;
+}
+.btn-icon:hover { background: var(--surface-2); color: var(--danger); }
+
+/* ============================================================
+   Inputs
+   ============================================================ */
+.input {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font: inherit;
+    font-size: .875rem;
+    padding: .45rem .75rem;
+    outline: none;
+    transition: border-color .15s;
+}
+.input:focus { border-color: var(--accent); }
+.input::placeholder { color: var(--text-muted); }
+
+/* ============================================================
+   Page header (index)
+   ============================================================ */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+.page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* ============================================================
+   Project grid
+   ============================================================ */
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+}
+
+.project-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    transition: transform .15s, box-shadow .15s;
+}
+.project-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+.project-card-color-bar {
+    height: 4px;
+    background: var(--project-color, var(--accent));
+}
+
+.project-card-body {
+    padding: 1.1rem 1.25rem 1.25rem;
+}
+
+.project-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: .35rem;
+}
+
+.project-card-desc {
+    font-size: .8rem;
+    color: var(--text-muted);
+    margin-bottom: .75rem;
+    min-height: 1.2em;
+}
+
+.project-card-date {
+    font-size: .75rem;
+    color: var(--text-muted);
+}
+
+.project-card-actions {
+    position: absolute;
+    top: .6rem;
+    right: .6rem;
+    display: flex;
+    gap: .15rem;
+    opacity: 0;
+    transition: opacity .15s;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+}
+.project-card:hover .project-card-actions { opacity: 1; }
+
+/* ============================================================
+   Empty state
+   ============================================================ */
+#empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+}
+#empty-state p { margin-bottom: 1.25rem; }
+
+/* ============================================================
+   Project page header
+   ============================================================ */
+.project-header {
+    margin-bottom: 2rem;
+}
+
+#project-color-bar {
+    height: 5px;
+    border-radius: 3px;
+    background: var(--accent);
+    margin-bottom: 1rem;
+    width: 60px;
+}
+
+.project-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+#project-name {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+#project-desc {
+    color: var(--text-muted);
+    margin-top: .35rem;
+    font-size: .9rem;
+}
+
+/* ============================================================
+   Module cards
+   ============================================================ */
+#modules-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    /* Extra scroll room so the last module can be scrolled up to roughly
+       half the viewport height instead of stopping flush at the bottom. */
+    margin-bottom: 50vh;
+}
+
+.module-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.module-card-header {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .85rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background .12s;
+}
+.module-card-header:hover { background: var(--surface-2); }
+
+.module-icon   { font-size: 1.1rem; }
+
+.module-type-label {
+    font-size: .7rem;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: .15rem .55rem;
+}
+
+.module-card-body {
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.module-unknown { color: var(--danger); font-size: .875rem; }
+
+.empty-modules {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+}
+
+
+/* ============================================================
+   Module actions row
+   ============================================================ */
+.module-actions {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-top: .75rem;
+}
+.save-status { font-size: .75rem; color: var(--success); }
+
+/* ============================================================
+   Modal
+   ============================================================ */
+.modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+}
+
+.modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: var(--shadow);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+.modal-header h2 { font-size: 1.1rem; font-weight: 600; }
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    margin-bottom: 1rem;
+}
+.form-group label { font-size: .8rem; color: var(--text-muted); font-weight: 500; }
+.form-group .input { width: 100%; }
+
+.form-row { display: flex; gap: .75rem; align-items: flex-end; }
+.form-row .form-group { flex: 1; }
+
+.modal-footer { display: flex; justify-content: flex-end; gap: .5rem; margin-top: 1.25rem; }
+
+/* ============================================================
+   Move (up/down) buttons — expand/collapse toggle now lives on the
+   whole header (click anywhere except a button/title), no dedicated arrow.
+   ============================================================ */
+.move-buttons {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 1px;
+    flex-shrink: 0;
+}
+.move-buttons .btn-icon:disabled { opacity: .25; cursor: default; }
+.move-buttons .btn-icon:disabled:hover { background: transparent; color: var(--text-muted); }
+
+
+/* ============================================================
+   Backup indicator
+   ============================================================ */
+#backup-indicator {
+    position: fixed;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    font-size: .78rem;
+    font-weight: 600;
+    padding: .4rem .85rem;
+    border-radius: 999px;
+    z-index: 200;
+    pointer-events: none;
+    animation: fadeIn .2s ease;
+}
+.backup-ok    { background: var(--success); color: #fff; }
+.backup-error { background: var(--danger);  color: #fff; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 600px) {
+    .project-grid           { grid-template-columns: 1fr; }
+    .roadmap-toolbar        { flex-direction: column; align-items: stretch; }
+    .roadmap-filter-status,
+    .roadmap-groupby,
+    .roadmap-new-status,
+    .roadmap-new-due        { width: 100%; }
+    .template-table         { font-size: .78rem; }
+    .template-field-row     { flex-direction: column; align-items: stretch; }
+}
+
+/* ============================================================
+   Page header actions / project header actions
+   ============================================================ */
+.page-header-actions,
+.project-header-actions {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+/* ============================================================
+   Search
+   ============================================================ */
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+}
+.search-bar .input { flex: 1; }
+.search-bar .checkbox-label { white-space: nowrap; }
+
+.search-section-title {
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-muted);
+    margin: 1.25rem 0 .5rem;
+}
+.search-section-title:first-child { margin-top: 0; }
+
+.search-result-list { display: flex; flex-direction: column; gap: .4rem; }
+.search-result {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+.search-result a {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    padding: .65rem .9rem;
+    text-decoration: none;
+}
+.search-result-title { font-weight: 600; font-size: .9rem; color: var(--text); }
+.search-result-meta  { font-size: .78rem; color: var(--text-muted); }
+
+/* ============================================================
+   Checkboxes (shared by search / access panels)
+   ============================================================ */
+.checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .8rem;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+.checkbox-label input { accent-color: var(--accent); }
+
+/* ============================================================
+   Module: rename input/button
+   ============================================================ */
+.module-title-group, .folder-child-title-group {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    min-width: 0;
+    width: fit-content;
+    cursor: default;
+}
+.module-title, .folder-child-title { font-weight: 600; font-size: .9rem; }
+
+.module-rename-btn, .folder-child-rename {
+    font-size: .78rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+.module-rename-btn:hover, .folder-child-rename:hover { color: var(--text); }
+
+.module-rename-input {
+    padding: .1rem .3rem;
+    font: inherit;
+    font-weight: 600;
+    font-size: .9rem;
+    width: 100%;
+}
+
+/* ============================================================
+   Wide modal variant (members / backups panels)
+   ============================================================ */
+.modal-wide { max-width: 640px; max-height: 80vh; overflow-y: auto; }
+
+.panel-section { margin-bottom: 1.5rem; }
+.panel-section h3 { font-size: .95rem; margin-bottom: .6rem; }
+.panel-subheading { font-size: .85rem; color: var(--text-muted); margin: .5rem 0; }
+
+.panel-add-form {
+    margin-top: .75rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: .6rem .8rem;
+}
+.panel-add-form summary { cursor: pointer; font-size: .82rem; color: var(--text-muted); }
+.panel-add-form form { display: flex; flex-direction: column; gap: .6rem; margin-top: .75rem; }
+
+.permission-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem .9rem;
+}
+
+/* ============================================================
+   Access rows (roles / members list)
+   ============================================================ */
+.role-list, .member-list { display: flex; flex-direction: column; gap: .4rem; }
+
+.access-row {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .5rem .7rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+.access-row-name { font-weight: 600; font-size: .85rem; }
+.access-row-meta { font-size: .78rem; color: var(--text-muted); }
+.access-row-chips { flex: 1; display: flex; flex-wrap: wrap; gap: .3rem; }
+
+.perm-chip {
+    font-size: .7rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: .1rem .55rem;
+}
+.perm-chip-muted { opacity: .6; }
+
+.member-role-editor {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem .9rem;
+}
+
+/* ============================================================
+   Backups / history panel
+   ============================================================ */
+.backup-tabs { display: flex; gap: .4rem; margin-bottom: 1rem; }
+.backup-tab {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    padding: .4rem .9rem;
+    font: inherit;
+    font-size: .82rem;
+    cursor: pointer;
+}
+.backup-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.backup-tab-panel { display: flex; flex-direction: column; gap: .4rem; }
+.backup-row .btn { margin-left: auto; }
+
+/* ============================================================
+   Diff view
+   ============================================================ */
+.diff-rows { display: flex; flex-direction: column; gap: .35rem; margin: 1rem 0; }
+
+.diff-row {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .5rem .7rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+.diff-row-title { font-weight: 600; font-size: .85rem; }
+.diff-row-meta  { flex: 1; font-size: .78rem; color: var(--text-muted); }
+.diff-select { white-space: nowrap; }
+
+.diff-preview {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .6rem .8rem;
+    font-family: var(--font-mono);
+    font-size: .75rem;
+    overflow-x: auto;
+    margin: -.15rem 0 .35rem;
+    white-space: pre-wrap;
+}
+
+.status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.status-add       { background: var(--success); }
+.status-modify    { background: #e0a83c; }
+.status-unchanged { background: var(--text-muted); opacity: .5; }
+.status-removed   { background: var(--danger); opacity: .6; }
+
+/* ============================================================
+   Project header: rename affordance + edit form
+   ============================================================ */
+.project-header-meta { flex: 1; min-width: 0; }
+.project-title-row { display: flex; align-items: center; gap: .5rem; }
+.project-title-row #btn-rename-project { color: var(--text-muted); }
+.project-title-row #btn-rename-project:hover { color: var(--text); }
+
+.project-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    margin-top: 1rem;
+    max-width: 480px;
+}
+.project-edit-form textarea.input { min-height: 70px; resize: vertical; }
+
+/* ============================================================
+   Module toolbar buttons (copy / paste)
+   ============================================================ */
+.module-copy { color: var(--text-muted); }
+.module-copy:hover { color: var(--text); }
+
+/* ============================================================
+   Toasts
+   ============================================================ */
+#toast-host {
+    position: fixed;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    z-index: 200;
+    align-items: center;
+}
+.toast {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .6rem 1rem;
+    font-size: .85rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,.35);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .2s, transform .2s;
+    max-width: 360px;
+    text-align: center;
+}
+.toast-visible { opacity: 1; transform: translateY(0); }
+.toast-error { border-color: var(--danger); color: var(--danger); }
+.toast-info  { border-color: var(--accent); }
+
+/* ============================================================
+   Inbox unread badge
+   ============================================================ */
+#btn-inbox { position: relative; }
+.badge-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--danger);
+    color: #fff;
+    font-size: .62rem;
+    line-height: 1;
+    padding: .2rem .35rem;
+    border-radius: 999px;
+    min-width: 14px;
+    text-align: center;
+}
+
+/* ============================================================
+   Inbox panel
+   ============================================================ */
+.inbox-list { display: flex; flex-direction: column; gap: .5rem; }
+.inbox-row {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .6rem .8rem;
+}
+.inbox-row.unread { border-color: var(--accent); }
+.inbox-row-main { display: flex; align-items: center; gap: .5rem; }
+.inbox-row-title { font-weight: 600; font-size: .87rem; }
+.inbox-row-status { font-size: .75rem; color: var(--text-muted); margin-left: auto; }
+.inbox-row-body { font-size: .82rem; color: var(--text-muted); margin: .3rem 0; }
+.inbox-row-time { font-size: .72rem; }
+.inbox-row-actions { display: flex; gap: .5rem; margin-top: .5rem; }
+
+/* ============================================================
+   Settings panel
+   ============================================================ */
+.settings-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: .75rem;
+}
+.settings-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .3rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .9rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+}
+.settings-card:hover { border-color: var(--accent); background: var(--surface); }
+.settings-card-icon { font-size: 1.3rem; }
+.settings-card-title { font-weight: 600; font-size: .88rem; }
+.settings-card-desc { font-size: .76rem; color: var(--text-muted); }
+
+.settings-inline-panel { margin-top: 1rem; }
+.access-info-panel {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .8rem 1rem;
+    font-size: .85rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+/* ============================================================
+   Board: zoom controls + single color button
+   ============================================================ */
+.board-zoom-controls { display: flex; align-items: center; gap: .2rem; }
+.btn-zoom-reset { width: auto; padding: 0 .4rem; font-size: .72rem; }
+
+.sticky-color-btn {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.4);
+    cursor: pointer;
+    padding: 0;
+}
+.sticky-note.note-color-yellow .sticky-color-btn { background: #ca8a04; }
+.sticky-note.note-color-blue   .sticky-color-btn { background: #3b82c4; }
+.sticky-note.note-color-green  .sticky-color-btn { background: #4caf84; }
+.sticky-note.note-color-pink   .sticky-color-btn { background: #d1548a; }
+.sticky-note.note-color-purple .sticky-color-btn { background: #9163e0; }
+
+/* ============================================================
+   Sticky resize handle (bottom-right corner)
+   ============================================================ */
+.sticky-note { position: relative; }
+.sticky-resize-handle {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    height: 20px;
+    cursor: nwse-resize;
+    touch-action: none;
+}
+.sticky-resize-handle::after {
+    content: "";
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid rgba(255,255,255,.5);
+    border-bottom: 2px solid rgba(255,255,255,.5);
+}
+
+/* ============================================================
+   Jump-to-module highlight flash (used by linked-record clicks)
+   ============================================================ */
+.jump-highlight {
+    animation: jump-flash 1.6s ease-out;
+}
+@keyframes jump-flash {
+    0%   { box-shadow: 0 0 0 3px var(--accent); }
+    70%  { box-shadow: 0 0 0 3px var(--accent); }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* ============================================================
+   Profile menu (topbar)
+   ============================================================ */
+.profile-menu-wrap { position: relative; }
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    min-width: 140px;
+    z-index: 50;
+    overflow: hidden;
+}
+.profile-dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: .55rem .8rem;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font: inherit;
+    font-size: .85rem;
+    cursor: pointer;
+}
+.profile-dropdown button:hover { background: var(--surface-2); }
+
+/* ============================================================
+   Project edit form: color row
+   ============================================================ */
+.project-edit-color-row { display: flex; align-items: center; gap: .6rem; }
+.project-edit-color-row label { font-size: .82rem; color: var(--text-muted); }
+.project-edit-color-row input[type=color] { width: 44px; height: 30px; padding: 2px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2); cursor: pointer; }
+
+/* ============================================================
+   Recursive backup diff tree
+   ============================================================ */
+.diff-expand-btn { width: 18px; height: 18px; font-size: .65rem; padding: 0; flex-shrink: 0; }
+.diff-expand-spacer { display: inline-block; width: 18px; flex-shrink: 0; }
+.diff-children { border-left: 1px dashed var(--border); margin-left: 1.1rem; }
+
+/* ============================================================
+   Reorder arrows: bigger, plus the move-flash feedback animation
+   ============================================================ */
+.move-buttons .btn-icon {
+    width: 40px;
+    height: 18px;
+    padding: 0;
+    line-height: 1;
+    font-size: 1.15rem;
+}
+
+@keyframes move-flash {
+    0%   { background: var(--accent); }
+    100% { background: transparent; }
+}
+.move-flash { animation: move-flash .5s ease-out; }
+
+/* ============================================================
+   Folder "+ add item" disclosure
+   ============================================================ */
+.folder-add-details { margin-top: .5rem; }
+.folder-add-summary {
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+.folder-add-summary::-webkit-details-marker { display: none; }
+.folder-add-details[open] .folder-add-summary { margin-bottom: .5rem; }
+
+.btn-panel-back { margin-bottom: .8rem; }
+
+/* ============================================================
+   Floating "+ add module" button (shows once the header button scrolls
+   out of view, like a small floating action button / bookmark tab)
+   ============================================================ */
+.btn-floating-add {
+    position: fixed;
+    top: 5.5rem;
+    right: 1.5rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 1.4rem;
+    line-height: 1;
+    box-shadow: 0 6px 18px rgba(0,0,0,.4);
+    z-index: 40;
+    border: none;
+    transition: transform .15s;
+}
+.btn-floating-add:hover { transform: scale(1.08); background: var(--accent); }

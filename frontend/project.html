@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project · Project Hub</title>
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/modules.css" />
+</head>
+<body>
+
+<!-- ── Topbar ── -->
+<header class="topbar">
+    <a class="topbar-logo" href="/">Project<span>Hub</span></a>
+<div style="display: flex;gap: 12px;align-items: center;">
+    <span id="status" style="display: inline-block;width: 6px;height: 6px;border-radius: 50%;margin-right: 8px;animation: blink 1.2s ease-in-out infinite;background: #69F0AE;"></span>
+    <button class="btn-icon" id="btn-inbox" title="Inbox">📥</button>
+    <div id="login-information">
+        {% if username is not none %}
+            <span id="current-username" hidden>{{ username }}</span>
+            <div class="profile-menu-wrap">
+                <button class="btn-ghost profile-btn" id="profile-btn">👤 {{ username }}</button>
+                <div class="profile-dropdown" id="profile-dropdown" style="display:none">
+                    <button id="profile-settings-btn">⚙ Settings</button>
+                    <button id="logout-btn">Logout</button>
+                </div>
+            </div>
+        {% else %}
+            <a href="/auth">not logged in - login</a>
+        {% endif %}
+    </div>
+</div>
+</header>
+
+<!-- ── Main ── -->
+<main class="page-wrapper">
+    <div class="project-header">
+        <div id="project-color-bar"></div>
+        <div class="project-header-top">
+            <div class="project-header-meta">
+                <div class="project-title-row">
+                    <h1 id="project-name">Loading…</h1>
+                    <button class="btn-icon" id="btn-rename-project" title="Edit project" hidden>✎</button>
+                </div>
+                <p id="project-desc"></p>
+            </div>
+            <div class="project-header-actions">
+                <button class="btn btn-primary" id="btn-add-module" hidden>+ Add module</button>
+                <button class="btn btn-ghost" id="btn-settings" title="Settings">⚙ Settings</button>
+            </div>
+        </div>
+        <div class="project-edit-form" id="project-edit-form" style="display:none">
+            <input class="input" id="project-edit-name" placeholder="Project name" />
+            <textarea class="input" id="project-edit-desc" placeholder="Description"></textarea>
+            <div class="project-edit-color-row">
+                <label for="project-edit-color">Color</label>
+                <input class="input" id="project-edit-color" type="color" />
+            </div>
+            <div class="module-actions">
+                <button class="btn btn-primary" id="btn-save-project">Save</button>
+                <button class="btn btn-ghost" id="btn-cancel-project-edit">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modules-container"></div>
+</main>
+
+<button class="btn-icon btn-floating-add" id="btn-floating-add-module" title="Add module" hidden>+</button>
+
+<script src="/js/utils.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/modules/registry.js"></script>
+<script src="/js/modules/notes.js"></script>
+<script src="/js/modules/roadmap.js"></script>
+<script src="/js/modules/template.js"></script>
+<script src="/js/modules/checklist.js"></script>
+<script src="/js/modules/links.js"></script>
+<script src="/js/modules/calendar.js"></script>
+<script src="/js/modules/board.js"></script>
+<script src="/js/modules/embed.js"></script>
+<script src="/js/modules/drawio.js"></script>
+<script src="/js/modules/folder.js"></script>
+<script src="/js/module-modal.js"></script>
+<script src="/js/members.js"></script>
+<script src="/js/backups.js"></script>
+<script src="/js/settings.js"></script>
+<script src="/js/inbox.js"></script>
+<script src="/js/profile.js"></script>
+<script src="/js/account-settings.js"></script>
+<script src="/js/project.js"></script>
+</body>
+</html>

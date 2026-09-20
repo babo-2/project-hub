@@ -1,0 +1,734 @@
+/* ============================================================
+   Notes module
+   ============================================================ */
+.notes-editor-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.notes-editor {
+    width: 100%;
+    height: 300px;      /* initial; JS will override via style.height */
+    resize: none;       /* we use our own handle */
+    font-family: var(--font-mono);
+    font-size: .85rem;
+    line-height: 1.7;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    border-bottom: none;
+    color: var(--text);
+    padding: .75rem;
+    outline: none;
+    transition: border-color .15s;
+    overflow-y: auto;
+}
+.notes-editor:focus { border-color: var(--accent); }
+
+.notes-resize-handle {
+    height: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--border);
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    cursor: ns-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    transition: background .15s;
+}
+.notes-resize-handle::after {
+    content: "";
+    width: 32px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--border);
+    display: block;
+}
+.notes-resize-handle:hover,
+.notes-resize-handle.dragging {
+    background: var(--surface-2);
+    border-color: var(--accent);
+}
+.notes-resize-handle.dragging::after { background: var(--accent); }
+
+/* contenteditable placeholder, since <div> has no native placeholder attr */
+.notes-editor:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+/* An inline module/url link chip - shown as its title in link styling only
+   (no icon), per spec. Left-click follows it; right-click edits it. */
+.notes-link {
+    display: inline;
+    color: var(--accent);
+    text-decoration: underline;
+    cursor: pointer;
+}
+.notes-link:hover { color: var(--accent-hover, var(--accent)); }
+
+/* An inline image chip - no title, just the image; right-click edits its source. */
+.notes-inline-img {
+    display: inline-block;
+    max-width: 260px;
+    max-height: 200px;
+    vertical-align: middle;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin: 2px 4px;
+}
+
+/* Custom right-click menu (Add link / Edit link) - notes.js positions this
+   at the cursor and tears it down again on outside click/Escape. */
+.notes-context-menu {
+    position: fixed;
+    z-index: 1000;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+    padding: .25rem;
+    min-width: 150px;
+}
+.notes-context-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: .45rem .6rem;
+    font-size: .85rem;
+    color: var(--text);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+}
+.notes-context-item:hover { background: var(--surface-2); }
+
+/* ============================================================
+   Roadmap module
+   ============================================================ */
+
+/* Header */
+.roadmap-header { margin-bottom: 1rem; }
+.roadmap-header-fields { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .5rem; }
+.roadmap-title-input { font-size: 1rem; font-weight: 600; }
+.roadmap-desc-input  { min-height: 52px; resize: vertical; font-size: .85rem; }
+
+/* Toolbar */
+.roadmap-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    align-items: center;
+    padding: .6rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: .75rem;
+}
+.roadmap-groupby-wrap  { display: flex; align-items: center; gap: .4rem; }
+.roadmap-groupby-days  { display: flex; align-items: center; gap: .35rem; }
+.roadmap-days-input    { width: 62px; }
+.roadmap-days-label    { font-size: .8rem; color: var(--text-muted); white-space: nowrap; }
+.roadmap-filter-title  { flex: 1; min-width: 140px; }
+.roadmap-filter-status { width: 140px; }
+.roadmap-groupby       { width: 150px; }
+
+/* Group headers */
+.roadmap-group-header {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: .6rem .25rem .25rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: .35rem;
+    margin-top: .75rem;
+}
+.roadmap-group-header:first-child { margin-top: 0; }
+
+/* Items */
+.roadmap-list-container { display: flex; flex-direction: column; margin-bottom: .75rem; }
+
+.roadmap-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    font-size: .875rem;
+    padding: .6rem .75rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    margin-bottom: .4rem;
+}
+
+.roadmap-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: .3rem;
+    background: var(--text-muted);
+}
+.status-done        .roadmap-dot { background: var(--success); }
+.status-in_progress .roadmap-dot { background: var(--accent);  }
+
+.roadmap-item-body  { flex: 1; min-width: 0; }
+.roadmap-item-top   { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.roadmap-item-title { font-weight: 600; flex: 1; min-width: 0; word-break: break-word; }
+.roadmap-item-desc  { font-size: .8rem; color: var(--text-muted); margin-top: .2rem; }
+
+.roadmap-status-badge {
+    font-size: .7rem;
+    font-weight: 600;
+    color: var(--badge-color, var(--text-muted));
+    border: 1px solid var(--badge-color, var(--border));
+    border-radius: 999px;
+    padding: .1rem .5rem;
+    white-space: nowrap;
+    opacity: .85;
+}
+
+.roadmap-due { font-size: .75rem; color: var(--text-muted); white-space: nowrap; }
+.roadmap-due.overdue { color: var(--danger); font-weight: 600; }
+
+.roadmap-item-actions { display: flex; gap: .2rem; flex-shrink: 0; }
+
+/* Edit row */
+.roadmap-edit-row { align-items: flex-start; }
+.roadmap-edit-fields { flex: 1; display: flex; flex-direction: column; gap: .4rem; }
+.roadmap-edit-row-2  { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+.roadmap-edit-row-2 .input { flex: 1; min-width: 100px; }
+
+/* Add section */
+.roadmap-add-section { margin-top: .5rem; }
+.roadmap-add-label   { font-size: .78rem; font-weight: 600; color: var(--text-muted);
+                        text-transform: uppercase; letter-spacing: .04em; margin-bottom: .4rem; }
+.roadmap-add-row     { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+.roadmap-new-title   { flex: 1; min-width: 130px; }
+.roadmap-new-desc    { flex: 2; min-width: 160px; }
+.roadmap-new-status  { width: 130px; }
+.roadmap-new-due     { width: 146px; }
+
+.roadmap-empty { color: var(--text-muted); font-size: .875rem; padding: .75rem 0; }
+
+
+/* ============================================================
+   Template module
+   ============================================================ */
+
+/* Top bar: schema toggle + view switcher side by side */
+.template-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-bottom: .5rem;
+    flex-wrap: wrap;
+}
+
+.template-schema-bar {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex: 1;
+    min-width: 0;
+}
+.template-schema-summary { font-size: .82rem; color: var(--text-muted); flex: 1; min-width: 0;
+                            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* View switcher — two joined buttons */
+.template-view-switcher {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.btn-view {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: .8rem;
+    font-weight: 500;
+    padding: .35rem .75rem;
+    cursor: pointer;
+    transition: background .12s, color .12s;
+    white-space: nowrap;
+}
+.btn-view + .btn-view { border-left: 1px solid var(--border); }
+.btn-view:hover  { background: var(--surface-2); color: var(--text); }
+.btn-view.active { background: var(--accent); color: #fff; }
+
+/* Schema editor */
+.template-schema-wrap { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .75rem; }
+
+.template-field-row,
+.template-add-field-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    align-items: center;
+}
+.template-field-row .input { flex: 1; min-width: 90px; }
+.tf-set-primary            { flex-shrink: 0; }
+.tf-label                  { flex: 2 !important; min-width: 120px !important; }
+.tf-type                   { flex: 1 !important; min-width: 110px !important; }
+.tf-options                { flex: 2 !important; min-width: 160px !important; }
+.tf-options-placeholder    { width: 0; }
+.template-add-field-row .tf-new-label { flex: 2; min-width: 130px; }
+.template-add-field-row .tf-new-type  { flex: 1; min-width: 110px; }
+
+/* ── Table view ── */
+.template-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .85rem;
+    margin-bottom: .75rem;
+}
+.template-table th,
+.template-table td {
+    padding: .45rem .65rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+.template-table thead th {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-muted);
+    background: var(--surface-2);
+}
+.template-table tbody tr:hover   { background: var(--surface-2); }
+.template-table tbody tr.editing { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+
+.template-img-link { font-size: .8rem; color: var(--accent); }
+
+.col-created { font-size: .75rem; color: var(--text-muted); white-space: nowrap; width: 90px; }
+.col-actions { white-space: nowrap; width: 80px; text-align: right; }
+
+/* ── Visual view ── */
+.template-visual-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: .75rem;
+}
+
+.template-visual-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: box-shadow .15s, transform .15s;
+}
+.template-visual-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.template-visual-card.editing { border-color: var(--accent); transform: none; box-shadow: none; }
+
+/* Image area */
+.tvc-image-wrap {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.tvc-image-wrap.tvc-img-error::after {
+    content: "⚠ image failed";
+    font-size: .75rem;
+    color: var(--text-muted);
+}
+.tvc-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.tvc-image-placeholder {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .72rem;
+    color: var(--text-muted);
+    letter-spacing: .03em;
+}
+
+/* Card body */
+.tvc-body   { padding: .7rem .8rem; flex: 1; display: flex; flex-direction: column; gap: .3rem; }
+.tvc-field  { display: flex; flex-direction: column; gap: .05rem; }
+.tvc-field-label { font-size: .68rem; font-weight: 700; color: var(--text-muted);
+                   text-transform: uppercase; letter-spacing: .05em; }
+.tvc-field-value { font-size: .85rem; word-break: break-word; }
+.tvc-footer { font-size: .7rem; margin-top: auto; padding-top: .4rem; }
+
+/* Card action buttons — top-right corner, visible on hover */
+.tvc-actions {
+    position: absolute;
+    top: .4rem;
+    right: .4rem;
+    display: flex;
+    gap: .15rem;
+    opacity: 0;
+    transition: opacity .15s;
+}
+.template-visual-card:hover .tvc-actions { opacity: 1; }
+
+/* Edit card */
+.tvc-edit-fields { padding: .75rem; display: flex; flex-direction: column; gap: .5rem; }
+.tvc-edit-group  { display: flex; flex-direction: column; gap: .2rem; }
+.tvc-edit-label  { font-size: .72rem; font-weight: 700; color: var(--text-muted);
+                   text-transform: uppercase; letter-spacing: .04em; }
+.tvc-edit-group .input,
+.tvc-edit-group .input-sm { width: 100%; }
+
+/* Shared small utilities */
+.input-sm { padding: .3rem .5rem !important; font-size: .82rem !important; }
+.btn-sm   { padding: .3rem .6rem !important; font-size: .8rem  !important; }
+
+.template-hint { color: var(--text-muted); font-size: .875rem; padding: .5rem 0; }
+.text-muted    { color: var(--text-muted); }
+
+/* ============================================================
+   Shared color swatches (used by Calendar's event-color picker)
+   ============================================================ */
+.notes-colors  { display: flex; gap: .35rem; }
+
+.note-color-swatch {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    padding: 0;
+}
+.note-color-swatch.active { border-color: var(--text); }
+.note-color-swatch.note-color-default, .note-color-default { background: var(--surface-2); }
+.note-color-swatch.note-color-yellow,  .note-color-yellow  { background: #4a4223; }
+.note-color-swatch.note-color-blue,    .note-color-blue    { background: #1f3a52; }
+.note-color-swatch.note-color-green,   .note-color-green   { background: #1f4a35; }
+.note-color-swatch.note-color-pink,    .note-color-pink    { background: #4a1f3a; }
+.note-color-swatch.note-color-purple,  .note-color-purple  { background: #34204a; }
+
+.notes-word-count { font-size: .75rem; color: var(--text-muted); margin-left: auto; }
+
+/* ============================================================
+   Roadmap: reorder arrows, dependencies, assignee
+   ============================================================ */
+.roadmap-sortby { max-width: 160px; }
+.roadmap-move-buttons { align-self: flex-start; margin-top: .1rem; }
+
+.roadmap-assignee {
+    font-size: .75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+.roadmap-deps {
+    font-size: .78rem;
+    color: var(--text-muted);
+    margin-top: .25rem;
+}
+.roadmap-deps-editor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .4rem .8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .5rem .6rem;
+}
+.roadmap-deps-label { font-size: .78rem; color: var(--text-muted); font-weight: 600; width: 100%; }
+
+/* ============================================================
+   Template: sort/filter toolbar, reorder arrows, new field types
+   ============================================================ */
+.template-instances-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .6rem;
+}
+.template-instances-toolbar .input { width: auto; min-width: 140px; }
+
+.template-columns-editor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem .9rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .6rem .8rem;
+    margin-bottom: .6rem;
+}
+
+/* Table can get wide with many fields - scroll it instead of overflowing the card */
+.template-table-wrap { overflow-x: auto; max-width: 100%; }
+.template-table { min-width: 100%; }
+
+.col-move { width: 26px; }
+.tvc-move-buttons { position: absolute; top: .4rem; left: .4rem; z-index: 2; background: var(--surface); border-radius: 4px; padding: 1px; }
+
+.template-img-link { font-size: .8rem; }
+
+.template-jump-link {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font: inherit;
+    font-size: inherit;
+    padding: 0;
+    text-decoration: underline;
+    text-align: left;
+}
+.template-jump-link:hover { color: var(--text); }
+
+.tags-input {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .3rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .3rem;
+    background: var(--surface-2);
+}
+.tags-input-field { border: none; background: transparent; flex: 1; min-width: 80px; padding: .2rem; }
+.tag-chip { display: inline-flex; align-items: center; gap: .25rem; }
+.tag-chip-remove { border: none; background: transparent; color: inherit; cursor: pointer; font-size: .7rem; padding: 0; }
+
+.tf-long-text { min-height: 60px; resize: vertical; }
+.tf-hint { font-size: .78rem; color: var(--text-muted); }
+
+/* ============================================================
+   Checklist
+   ============================================================ */
+.checklist-groups { display: flex; flex-direction: column; gap: .9rem; margin-bottom: .9rem; }
+.checklist-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .7rem .85rem;
+}
+.checklist-card-header { display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; }
+.checklist-title { font-weight: 600; font-size: .9rem; cursor: text; border-radius: 4px; padding: .05rem .3rem; margin: -.05rem -.3rem; }
+.checklist-title:hover, .checklist-title:focus { background: var(--surface); outline: none; }
+.checklist-progress-text { font-size: .78rem; color: var(--text-muted); margin-left: auto; }
+.checklist-rename-input { font-weight: 600; font-size: .9rem; padding: .1rem .3rem; }
+
+.checklist-progress-bar { height: 5px; background: var(--surface); border-radius: 3px; overflow: hidden; margin-bottom: .6rem; }
+.checklist-progress-fill { height: 100%; background: var(--success); transition: width .2s; }
+
+.checklist-items { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .5rem; }
+.checklist-item { display: flex; align-items: center; gap: .5rem; }
+.checklist-item-label { display: flex; align-items: center; gap: .5rem; flex: 1; font-size: .85rem; cursor: pointer; }
+.checklist-item-label input { accent-color: var(--accent); }
+.checklist-item.done .checklist-item-label span { color: var(--text-muted); text-decoration: line-through; }
+.checklist-hint { color: var(--text-muted); font-size: .875rem; padding: .5rem 0; }
+
+/* ============================================================
+   Links
+   ============================================================ */
+.links-list { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .9rem; }
+.links-row {
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .55rem .7rem;
+}
+.links-favicon { width: 20px; height: 20px; margin-top: .1rem; border-radius: 4px; }
+.links-favicon-placeholder { font-size: 1rem; margin-top: .05rem; }
+.links-row-body { flex: 1; min-width: 0; }
+.links-row-title { font-weight: 600; font-size: .88rem; }
+.links-row-desc { font-size: .8rem; color: var(--text-muted); margin: .15rem 0; }
+.links-row-url { font-size: .72rem; color: var(--text-muted); word-break: break-all; }
+.links-add-row { display: flex; flex-wrap: wrap; gap: .5rem; }
+.links-add-row .input { flex: 1; min-width: 140px; }
+.links-hint { color: var(--text-muted); font-size: .875rem; padding: .5rem 0; }
+
+/* ============================================================
+   Calendar
+   ============================================================ */
+.calendar-toolbar { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; }
+.calendar-month-label { font-weight: 600; min-width: 140px; text-align: center; }
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    font-size: .72rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: .25rem;
+}
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.calendar-cell {
+    min-height: 72px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: .25rem;
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+}
+.calendar-cell.outside { background: transparent; border-color: transparent; }
+.calendar-cell-top { display: flex; align-items: center; justify-content: space-between; }
+.calendar-cell-day { font-size: .75rem; color: var(--text-muted); }
+.calendar-cell-day.is-today {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center;
+}
+.calendar-add-day { opacity: 0; font-size: .7rem; width: 18px; height: 18px; }
+.calendar-cell:hover .calendar-add-day { opacity: 1; }
+.calendar-cell-events { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+.calendar-event-chip {
+    font-size: .68rem;
+    text-align: left;
+    border: none;
+    border-radius: 3px;
+    padding: 1px 4px;
+    cursor: pointer;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.calendar-event-chip.cal-color-default { background: var(--accent); }
+.calendar-event-chip.cal-color-red    { background: #c14848; }
+.calendar-event-chip.cal-color-green  { background: #3f9d6f; }
+.calendar-event-chip.cal-color-blue   { background: #3b78c4; }
+.calendar-event-chip.cal-color-purple { background: #7c5cd6; }
+.calendar-event-chip.cal-color-orange { background: #c07830; }
+
+.calendar-editor-form { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .6rem; }
+.cal-color-default { background: var(--surface-2); }
+.cal-color-red    { background: #c14848; }
+.cal-color-green  { background: #3f9d6f; }
+.cal-color-blue   { background: #3b78c4; }
+.cal-color-purple { background: #7c5cd6; }
+.cal-color-orange { background: #c07830; }
+
+/* ============================================================
+   Board (stickies)
+   ============================================================ */
+.board-toolbar { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; }
+.board-canvas-wrap {
+    position: relative;
+    height: 480px;
+    overflow: hidden;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background-image: radial-gradient(var(--border) 1px, transparent 1px);
+    background-size: 22px 22px;
+    cursor: grab;
+}
+.board-canvas-wrap:active { cursor: grabbing; }
+.board-notes-layer { position: absolute; top: 0; left: 0; width: 0; height: 0; }
+
+.sticky-note {
+    position: absolute;
+    background: #4a4223;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.35);
+    padding: .5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+}
+.sticky-note.note-color-yellow { background: #4a4223; }
+.sticky-note.note-color-blue   { background: #1f3a52; }
+.sticky-note.note-color-green  { background: #1f4a35; }
+.sticky-note.note-color-pink   { background: #4a1f3a; }
+.sticky-note.note-color-purple { background: #34204a; }
+
+.sticky-note-header { display: flex; align-items: center; justify-content: space-between; gap: .4rem; cursor: grab; }
+.sticky-note-header:active { cursor: grabbing; }
+.sticky-delete { color: rgba(255,255,255,.6); }
+.sticky-text {
+    flex: 1;
+    resize: none;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-family: inherit;
+    font-size: .82rem;
+    min-height: 80px;
+}
+.sticky-text:focus { outline: none; }
+
+/* ============================================================
+   Embed & draw.io
+   ============================================================ */
+.embed-toolbar, .drawio-toolbar { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; }
+.embed-config-form { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .8rem; }
+.embed-payload { min-height: 100px; font-family: var(--font-mono, monospace); font-size: .8rem; }
+.embed-config-error { color: var(--danger); font-size: .8rem; }
+.embed-hint { color: var(--text-muted); font-size: .875rem; padding: .5rem 0; }
+.embed-iframe, .drawio-iframe {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #fff;
+}
+/* The draw.io embed itself is loaded in dark mode (see drawio.js), so the
+   iframe's own placeholder background should be dark too, instead of
+   flashing white while the editor loads. */
+.drawio-iframe { height: 560px; background: var(--surface-2); }
+.embed-last-message { font-size: .72rem; color: var(--text-muted); margin-top: .4rem; word-break: break-all; }
+.drawio-preview-img { max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+
+/* ============================================================
+   Folder
+   ============================================================ */
+.folder-children { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .9rem; }
+.folder-child-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
+/* Folders nested inside a folder get a visibly stronger, tinted border so
+   the eye can tell "this is a sub-folder" apart from a plain leaf item,
+   even several levels deep. */
+.folder-child-card-nested {
+    border: 2px solid var(--accent);
+    background: var(--surface);
+}
+.folder-child-header {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem .7rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background .12s;
+}
+.folder-child-header:hover { background: var(--surface); }
+.folder-child-card-nested .folder-child-header:hover { background: var(--surface-2); }
+.folder-child-title { font-weight: 600; font-size: .87rem; }
+.folder-child-copy { color: var(--text-muted); }
+.folder-child-copy:hover { color: var(--text); }
+.folder-child-body { padding: 0 .7rem .7rem; }
+.folder-add-btn { margin-top: .25rem; }
+.folder-hint { color: var(--text-muted); font-size: .875rem; padding: .5rem 0; }
