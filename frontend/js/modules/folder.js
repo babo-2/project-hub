@@ -52,6 +52,7 @@ class FolderModule {
             await onSave(data);
             statusEl.textContent = "Saved ✓";
             setTimeout(() => (statusEl.textContent = ""), 1800);
+            Utils.notifyModuleChanged();
         };
 
         function updateMoveButtonStates() {

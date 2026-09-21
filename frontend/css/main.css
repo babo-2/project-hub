@@ -777,50 +777,6 @@ p.error { color: var(--danger); }
 }
 
 /* ============================================================
-   Board: zoom controls + single color button
-   ============================================================ */
-.board-zoom-controls { display: flex; align-items: center; gap: .2rem; }
-.btn-zoom-reset { width: auto; padding: 0 .4rem; font-size: .72rem; }
-
-.sticky-color-btn {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,.4);
-    cursor: pointer;
-    padding: 0;
-}
-.sticky-note.note-color-yellow .sticky-color-btn { background: #ca8a04; }
-.sticky-note.note-color-blue   .sticky-color-btn { background: #3b82c4; }
-.sticky-note.note-color-green  .sticky-color-btn { background: #4caf84; }
-.sticky-note.note-color-pink   .sticky-color-btn { background: #d1548a; }
-.sticky-note.note-color-purple .sticky-color-btn { background: #9163e0; }
-
-/* ============================================================
-   Sticky resize handle (bottom-right corner)
-   ============================================================ */
-.sticky-note { position: relative; }
-.sticky-resize-handle {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 20px;
-    height: 20px;
-    cursor: nwse-resize;
-    touch-action: none;
-}
-.sticky-resize-handle::after {
-    content: "";
-    position: absolute;
-    right: 3px;
-    bottom: 3px;
-    width: 8px;
-    height: 8px;
-    border-right: 2px solid rgba(255,255,255,.5);
-    border-bottom: 2px solid rgba(255,255,255,.5);
-}
-
-/* ============================================================
    Jump-to-module highlight flash (used by linked-record clicks)
    ============================================================ */
 .jump-highlight {

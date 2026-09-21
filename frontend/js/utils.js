@@ -173,7 +173,14 @@ class Utils {
 
         for (let i = 0; i < path.length; i++) {
             const isTop = i === 0;
-            const selector = isTop ? `:scope > .module-card[data-id="${path[i]}"]` : `:scope > .folder-child-card[data-id="${path[i]}"]`;
+            // Top-level module-cards are direct children of #modules-container,
+            // so ":scope >" is correct there. Folder children are NOT direct
+            // children of a folder's own body though - they sit two levels
+            // deeper, inside that body's .module-folder > .folder-children
+            // wrapper - so this has to be a plain descendant selector, not a
+            // direct-child one, or it silently finds nothing and the whole
+            // jump quietly fails past this point.
+            const selector = isTop ? `:scope > .module-card[data-id="${path[i]}"]` : `:scope .folder-child-card[data-id="${path[i]}"]`;
             target = root.querySelector(selector);
             if (!target) return false;
 
@@ -275,6 +282,16 @@ class Utils {
         input.setSelectionRange(len, len);
     }
 
+    /** Dispatched whenever any module's saved data or title changes (see
+     *  project.js's saveModule/renameModule and folder.js's own save,
+     *  which both children and the folder itself save through), so a
+     *  non-overridden linked title shown elsewhere on the page (Notes
+     *  chips, Template's "linked module" field) can refresh without a
+     *  full reload. */
+    static notifyModuleChanged() {
+        window.dispatchEvent(new CustomEvent("project-hub:module-changed"));
+    }
+
     /** Polls `fn` until it returns a truthy value or the timeout elapses. */
     static _waitFor(fn, timeoutMs = 1000, intervalMs = 50) {
         return new Promise(resolve => {
@@ -289,3 +306,18 @@ class Utils {
         });
     }
 }
+
+
+//other stuff
+
+let ctrlPressed = false;
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Control") {
+        ctrlPressed = true;
+    }
+});
+document.addEventListener("keyup", (e) => {
+    if (e.key === "Control") {
+        ctrlPressed = false;
+    }
+});

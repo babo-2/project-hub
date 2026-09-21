@@ -647,15 +647,33 @@
 .board-canvas-wrap:active { cursor: grabbing; }
 .board-notes-layer { position: absolute; top: 0; left: 0; width: 0; height: 0; }
 
+.sticky-title-group {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  min-width: 0;
+  width: fit-content;
+  cursor: default;
+}
+
+.sticky-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sticky-note {
     position: absolute;
     background: #4a4223;
     border-radius: 6px;
     box-shadow: 0 4px 10px rgba(0,0,0,.35);
     padding: .5rem;
+    padding-top:0;
     display: flex;
     flex-direction: column;
     gap: .3rem;
+    border-top-left-radius: 0;
+    border-top-right-radius: 4px;
 }
 .sticky-note.note-color-yellow { background: #4a4223; }
 .sticky-note.note-color-blue   { background: #1f3a52; }
@@ -663,9 +681,9 @@
 .sticky-note.note-color-pink   { background: #4a1f3a; }
 .sticky-note.note-color-purple { background: #34204a; }
 
-.sticky-note-header { display: flex; align-items: center; justify-content: space-between; gap: .4rem; cursor: grab; }
+.sticky-note-header { display: flex; align-items: center; gap: .4rem; cursor: grab;border-bottom:1px solid red; margin-left: -0.4rem;margin-right: -0.4rem; }
 .sticky-note-header:active { cursor: grabbing; }
-.sticky-delete { color: rgba(255,255,255,.6); }
+.sticky-delete { color: rgba(255,255,255,.6); margin-right: 0.1rem; }
 .sticky-text {
     flex: 1;
     resize: none;
@@ -674,9 +692,89 @@
     color: #fff;
     font-family: inherit;
     font-size: .82rem;
-    min-height: 80px;
+    /*min-height: 80px;*/
 }
 .sticky-text:focus { outline: none; }
+
+
+.sticky-rename-input {
+  width: 100%;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 3px 14px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.sticky-rename-input::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.sticky-rename-input:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.sticky-rename-input:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #7c8cff;
+    box-shadow: 0 0 0 4px rgba(124, 140, 255, 0.2);
+}
+
+
+
+
+/* ============================================================
+   Board: zoom controls + single color button
+   ============================================================ */
+.board-zoom-controls { display: flex; align-items: center; gap: .2rem; }
+.btn-zoom-reset { width: auto; padding: 0 .4rem; font-size: .72rem; }
+
+.sticky-color-btn {
+    width: 14px;
+    min-width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.4);
+    cursor: pointer;
+    padding: 0;
+    margin-left: 0.2rem;
+    margin-right: 0.2rem;
+}
+.sticky-note.note-color-yellow .sticky-color-btn { background: #ca8a04; }
+.sticky-note.note-color-blue   .sticky-color-btn { background: #3b82c4; }
+.sticky-note.note-color-green  .sticky-color-btn { background: #4caf84; }
+.sticky-note.note-color-pink   .sticky-color-btn { background: #d1548a; }
+.sticky-note.note-color-purple .sticky-color-btn { background: #9163e0; }
+
+/* ============================================================
+   Sticky resize handle (bottom-right corner)
+   ============================================================ */
+.sticky-resize-handle {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    height: 20px;
+    cursor: nwse-resize;
+    touch-action: none;
+}
+.sticky-resize-handle::after {
+    content: "";
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid rgba(255,255,255,.5);
+    border-bottom: 2px solid rgba(255,255,255,.5);
+}
 
 /* ============================================================
    Embed & draw.io

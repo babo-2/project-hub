@@ -41,15 +41,15 @@
 class TemplateModule {
     type  = "template";
     label = "Template";
-    icon  = "📜";//"🗂️";
+    icon  =  "📜";//"🗂️";
     defaultData = { fields: [], instances: [], hiddenFieldIds: ["__created__"] };
 
     static FIELD_TYPES = [
         { value: "text",          label: "Text"          },
         { value: "long_text",     label: "Long text"     },
-        { value: "number",        label: "Number"        },
+        { value: "number",        label: "Integer"       },//Number
         { value: "select",        label: "Select"        },
-        { value: "tags",          label: "Tags"           },
+        { value: "tags",          label: "Tags"          },
         { value: "date",          label: "Date"          },
         { value: "checkbox",      label: "Checkbox"      },
         { value: "url",           label: "URL"           },
@@ -148,15 +148,16 @@ class TemplateModule {
         const save = async () => {
             await onSave(data);
             showSaved();
-            // Let every other rendered Template module know something here
-            // changed, so their "linked module" displays refresh without
-            // needing a page reload.
-            window.dispatchEvent(new window.CustomEvent("project-hub:template-changed"));
+            // Central saves already dispatch "project-hub:module-changed"
+            // (see Utils.notifyModuleChanged, called from project.js/folder.js's
+            // own save paths) - the listener below picks that up to refresh
+            // "linked module" displays without a page reload.
         };
 
         // Refresh allModules (and anything showing linked-module data)
-        // whenever ANOTHER Template module elsewhere on the page saves.
-        window.addEventListener("project-hub:template-changed", async () => {
+        // whenever ANY module anywhere on the page saves - a rename, a
+        // primary field value changing, a sticky's title, etc.
+        window.addEventListener("project-hub:module-changed", async () => {
             allModules = await this._fetchOtherModules(projectId, myPath);
             renderInstances();
             if (!schemaEditor.hidden) renderSchemaEditor();
@@ -410,6 +411,7 @@ class TemplateModule {
 
             wrap.appendChild(addRow);
 
+            /*
             const schSaveRow = document.createElement("div");
             schSaveRow.className = "module-actions";
             schSaveRow.innerHTML = `<button class="btn btn-primary btn-save-schema">Save schema</button>`;
@@ -418,7 +420,7 @@ class TemplateModule {
                 await save();
             });
             wrap.appendChild(schSaveRow);
-
+            */
             schemaEditor.appendChild(wrap);
         };
 
@@ -497,9 +499,9 @@ class TemplateModule {
     /** Fetches the project's top-level modules fresh and flattens them (via
      *  Utils.flattenModules) into every other module reachable from the
      *  project - "linked module" field targets. Called at mount and again
-     *  whenever another Template module elsewhere on the page signals it
-     *  changed (see the "project-hub:template-changed" listener in
-     *  render()), so linked data stays live without a reload. */
+     *  whenever any module elsewhere on the page signals it changed (see
+     *  the "project-hub:module-changed" listener in render()), so linked
+     *  data stays live without a reload. */
     async _fetchOtherModules(projectId, excludePath) {
         const all = await Utils.fetchProjectModules(projectId);
         const excludeKey = excludePath.join(">");
@@ -748,7 +750,7 @@ class TemplateModule {
                 if (!payload) return `<span class="text-muted">unavailable</span>`;
                 const target = allModules.find(m => m.path.join(">") === (payload.path ?? []).join(">"));
                 if (!target) return `<span class="text-muted">unavailable</span>`;
-                const label = payload.title ?? resolveLinkTitle(target, payload.extra ?? null);
+                const label = payload.title ?? resolveLinkTitle(target, payload.extra ?? null, allModules);
                 return `<button type="button" class="template-jump-link" data-jump-path='${Utils.escape(JSON.stringify(payload.path))}' data-jump-instance="${payload.extra != null ? Utils.escape(String(payload.extra)) : ""}">${Utils.escape(label)}</button>`;
             }
             default:
@@ -803,7 +805,7 @@ class TemplateModule {
                 const payload = inst.values[f.id] ? decodeModuleLinkToken(inst.values[f.id]) : null;
                 if (!payload) { btn.textContent = "Choose module…"; return; }
                 const target = allModules.find(m => m.path.join(">") === (payload.path ?? []).join(">"));
-                btn.textContent = payload.title ?? resolveLinkTitle(target, payload.extra ?? null);
+                btn.textContent = payload.title ?? resolveLinkTitle(target, payload.extra ?? null, allModules);
             };
             renderLabel();
 

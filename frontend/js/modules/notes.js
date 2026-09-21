@@ -65,12 +65,28 @@ function notesHtmlToPlainText(html) {
  * Template's "linked module" field, both of which store `title: null` to
  * mean "keep this live" rather than baking in a snapshot.
  *
- * @param {object|undefined} target  a Utils.flattenModules() entry ({ path, title, module_type, data }), or undefined if the link is dangling
- * @param {string|null}      extra   see NotesLinkPicker.SPECIFY_TYPES / Utils.jumpToModulePath
+ * A Template instance's display field can itself be a "linked module"
+ * field, so this recurses to resolve that nested link's title too - and
+ * so on, however many links deep. `seen` guards against a cycle (A's
+ * display field links to B, whose display field links back to A, maybe
+ * by a longer chain): each step it's about to take is a specific
+ * (module path, extra) pair, and revisiting one it's already taken means
+ * the chain can never resolve to real text, so it stops there and shows
+ * just the *first* module in the chain as a module, ignoring its
+ * specification, rather than looping.
+ *
+ * @param {object|undefined} target     a Utils.flattenModules() entry ({ path, title, module_type, data }), or undefined if the link is dangling
+ * @param {string|null}      extra      see NotesLinkPicker.SPECIFY_TYPES / Utils.jumpToModulePath
+ * @param {object[]}         allModules every module in the project (Utils.flattenModules()) - needed to follow a nested "linked module" display field
+ * @param {Set<string>}      seen       internal - the (path, extra) pairs already visited in this resolution chain
  */
-function resolveLinkTitle(target, extra) {
+function resolveLinkTitle(target, extra, allModules = [], seen = new Set()) {
     if (!target) return "unavailable";
     if (extra == null) return target.title;
+
+    const key = `${target.path.join(">")}::${extra}`;
+    if (seen.has(key)) return target.title; // cycle - fall back to "just the module"
+    const seenHere = new Set(seen).add(key);
 
     switch (target.module_type) {
         case "template": {
@@ -78,7 +94,18 @@ function resolveLinkTitle(target, extra) {
             const primary = fields.find(f => f.id === target.data.primaryFieldId) ?? fields[0];
             const inst    = (target.data.instances ?? []).find(i => String(i.id) === String(extra));
             if (!inst) return target.title;
-            return (primary && inst.values[primary.id]) || `Instance #${inst.id}`;
+            if (!primary) return `Instance #${inst.id}`;
+
+            const rawVal = inst.values[primary.id] ?? "";
+            if (primary.type !== "linked_module") return rawVal || `Instance #${inst.id}`;
+
+            // The display field is itself a "linked module" - resolve what
+            // IT points to instead of showing its raw stored token.
+            const payload = rawVal ? decodeModuleLinkToken(rawVal) : null;
+            if (!payload) return `Instance #${inst.id}`;
+            if (payload.title != null) return payload.title; // explicit override - no recursion needed
+            const nested = allModules.find(m => m.path.join(">") === (payload.path ?? []).join(">"));
+            return nested ? resolveLinkTitle(nested, payload.extra ?? null, allModules, seenHere) : `Instance #${inst.id}`;
         }
         case "notes": {
             if (!extra.startsWith("line:")) return target.title;
@@ -146,6 +173,11 @@ class NotesModule {
 
         editorEl.innerHTML = this._sanitizeHtml(raw.content ?? "");
         this._refreshDynamicTitles(editorEl, moduleData.project_id);
+
+        // Keep non-overridden chip titles live: refresh them whenever any
+        // module elsewhere on the page saves (a rename, a value that feeds
+        // a "specify" title, etc.) - not just once at load.
+        window.addEventListener("project-hub:module-changed", () => this._refreshDynamicTitles(editorEl, moduleData.project_id));
 
         const restoredHeight = localStorage.getItem(heightKey);
         if (restoredHeight) editorEl.style.height = `${restoredHeight}px`;
@@ -289,7 +321,7 @@ class NotesModule {
         const allModules = await Utils.fetchProjectModules(projectId);
         dynamic.forEach(({ el, payload }) => {
             const target = allModules.find(m => m.path.join(">") === (payload.path ?? []).join(">"));
-            el.textContent = resolveLinkTitle(target, payload.extra ?? null);
+            el.textContent = resolveLinkTitle(target, payload.extra ?? null, allModules);
         });
     }
 
@@ -627,7 +659,7 @@ class NotesLinkPicker {
     _updateTitlePreview() {
         if (this.overrideCheck.checked) return;
         const m = this.modules[this.targetSel.value];
-        this.textInput.value = m ? resolveLinkTitle(m, this._currentExtra()) : "";
+        this.textInput.value = m ? resolveLinkTitle(m, this._currentExtra(), this.modules) : "";
     }
 
     _ensureDom() {
@@ -701,7 +733,7 @@ class NotesLinkPicker {
 
             const extra = this._currentExtra();
             const title = this.overrideCheck.checked ? (this.textInput.value.trim() || null) : null;
-            const label = title ?? resolveLinkTitle(m, extra);
+            const label = title ?? resolveLinkTitle(m, extra, this.modules);
 
             const onSubmit = this._onSubmit;
             this.close();

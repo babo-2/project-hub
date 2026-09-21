@@ -75,10 +75,12 @@ class ProjectPage {
 
     async saveModule(moduleId, newData) {
         await api.updateModule(moduleId, { data: newData });
+        Utils.notifyModuleChanged();
     }
 
     async renameModule(moduleId, newTitle) {
         await api.updateModule(moduleId, { title: newTitle });
+        Utils.notifyModuleChanged();
     }
 
     async deleteModule(moduleId, event) {

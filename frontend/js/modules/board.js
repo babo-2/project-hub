@@ -33,6 +33,7 @@ class BoardModule {
     static GRID    = 10;
     static MIN_ZOOM = 0.3;
     static MAX_ZOOM = 2.5;
+    static TOP_Z = 0;
 
     static _id() {
         return crypto.randomUUID?.() ?? `s-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -121,6 +122,18 @@ class BoardModule {
             const cursorX = e.clientX - rect.left;
             const cursorY = e.clientY - rect.top;
             const factor  = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+            let scrollSpeed = 0.1
+
+            const sticky = document.querySelector(".sticky-note:hover")
+            if (sticky){
+                const text_area = sticky.querySelector(".sticky-text");
+                if (text_area && (text_area.scrollHeight > text_area.clientHeight)){//can scroll sticky
+                    if (!ctrlPressed){
+                        text_area.scrollTop += e.deltaY*scrollSpeed;
+                        return;
+                    }
+                }
+            }
             setZoom(zoom * factor, cursorX, cursorY);
         }, { passive: false });
 
@@ -211,17 +224,30 @@ class BoardModule {
         el.style.height = `${n.height ?? BoardModule.NOTE_H}px`;
         el.innerHTML = `
             <div class="sticky-note-header">
-                <input class="sticky-title" placeholder="Title…" value="${Utils.escape(n.title ?? "")}" />
-                <button type="button" class="sticky-color-btn" title="Change color"></button>
+            <button type="button" class="sticky-color-btn" title="Change color"></button>
+                <div class="sticky-title-group">
+                    <span class="sticky-title">${Utils.escape(n.title ?? "")}</span>
+                    <button class="btn-icon sticky-rename-btn" title="Rename">✎</button>
+                </div>
+                <div style="flex:1"></div>
                 <button class="btn-icon sticky-delete" title="Remove">✕</button>
             </div>
             <textarea class="sticky-text" placeholder="Write something…">${Utils.escape(n.text)}</textarea>
             <div class="sticky-resize-handle" title="Drag to resize"></div>
         `;
 
+        //<input class="sticky-title" placeholder="Title…" value="${Utils.escape(n.title ?? "")}" />
+
         const header = el.querySelector(".sticky-note-header");
         const colorBtn = el.querySelector(".sticky-color-btn");
-        const titleInput = el.querySelector(".sticky-title");
+        const title   = el.querySelector(".sticky-title");
+        const renameBtn = el.querySelector(".sticky-rename-btn");
+
+        renameBtn.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._startRename(title, n, save);
+        })
 
         // Native text/element drag would otherwise fire a real "dragstart"
         // that bubbles up to the project page's drag-reorder listeners.
@@ -237,12 +263,7 @@ class BoardModule {
             saveTimer = setTimeout(save, 900);
         });
 
-        titleInput.addEventListener("input", () => {
-            n.title = titleInput.value;
-            clearTimeout(saveTimer);
-            saveTimer = setTimeout(save, 900);
-        });
-
+        //TODO: color picker
         colorBtn.addEventListener("click", async () => {
             const idx = STICKY_COLORS.indexOf(n.color);
             n.color = STICKY_COLORS[(idx + 1) % STICKY_COLORS.length];
@@ -304,8 +325,48 @@ class BoardModule {
             resizeStart = null;
             await save();
         });
-
+        el.addEventListener("mousedown", ()=>{
+            if (el.style.zIndex !== BoardModule.TOP_Z) {
+                el.style.zIndex = ++BoardModule.TOP_Z;
+            }
+            const index = data.notes.indexOf(n);
+            if (index !== -1) {
+                data.notes.splice(index, 1); 
+                data.notes.push(n);      //top level data (don't save)
+            }
+        })
         return el;
+    }
+
+    /** Swaps a module's title span for an inline input, saving on blur/Enter. */
+    _startRename(titleEl, m, save) {
+        const original = m.title;
+
+        const finish = async (commit) => {
+            const newTitle = titleEl.querySelector("input").value.trim();
+            if (commit && newTitle && newTitle !== original) {
+                m.title = newTitle;
+                titleEl.textContent = newTitle;
+                await save();
+            } else {
+                titleEl.textContent = original;
+            }
+        };
+
+        if (titleEl.querySelector("input")) {
+            finish(true)
+            return;
+        };
+
+        titleEl.innerHTML = `<input class="input sticky-rename-input" type="text" value="${Utils.escape(original)}" />`;
+        const input = titleEl.querySelector("input");
+        Utils.focusRenameInput(input);
+
+        //input.addEventListener("blur", (e) => {e.preventDefault();e.stopPropagation();finish(true);});
+        input.addEventListener("keydown", e => {
+            if (e.key === "Enter") { e.preventDefault(); input.blur(); }
+            if (e.key === "Escape") { e.preventDefault(); finish(false); }
+        });
     }
 }
 
