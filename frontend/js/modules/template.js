@@ -503,9 +503,11 @@ class TemplateModule {
      *  the "project-hub:module-changed" listener in render()), so linked
      *  data stays live without a reload. */
     async _fetchOtherModules(projectId, excludePath) {
-        const all = await Utils.fetchProjectModules(projectId);
+        //await Utils.fetchProjectModules(projectId);
+        console.log("FETCH NEW")
         const excludeKey = excludePath.join(">");
-        return all.filter(m => m.path.join(">") !== excludeKey);
+        console.log(excludeKey)
+        return Utils.flattenModules(project._modules).filter(m => m.path.join(">") !== excludeKey);
     }
 
     // =========================================================================
@@ -734,6 +736,7 @@ class TemplateModule {
 
     _displayValue(f, val, allModules) {
         if (val === "" || val === undefined || val === null) return "—";
+        
 
         switch (f.type) {
             case "checkbox":

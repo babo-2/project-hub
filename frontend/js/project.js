@@ -74,7 +74,15 @@ class ProjectPage {
     }
 
     async saveModule(moduleId, newData) {
-        await api.updateModule(moduleId, { data: newData });
+        let updated_data = await api.updateModule(moduleId, { data: newData });
+        for (let module_ of this._modules){
+            if (module_.id == moduleId){
+                //should I use updated_data data or newData?
+                //Object.assign(module_, updated_data);
+                module_.data=updated_data.data//just update data or all properties?
+                break;
+            }
+        }
         Utils.notifyModuleChanged();
     }
 
@@ -328,4 +336,4 @@ class ProjectPage {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => new ProjectPage());
+document.addEventListener("DOMContentLoaded", () => {project=new ProjectPage()});

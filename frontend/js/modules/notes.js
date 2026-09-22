@@ -172,12 +172,12 @@ class NotesModule {
         const wordCount = container.querySelector(".notes-word-count");
 
         editorEl.innerHTML = this._sanitizeHtml(raw.content ?? "");
-        this._refreshDynamicTitles(editorEl, moduleData.project_id);
+        this._refreshDynamicTitles(editorEl);
 
         // Keep non-overridden chip titles live: refresh them whenever any
         // module elsewhere on the page saves (a rename, a value that feeds
         // a "specify" title, etc.) - not just once at load.
-        window.addEventListener("project-hub:module-changed", () => this._refreshDynamicTitles(editorEl, moduleData.project_id));
+        window.addEventListener("project-hub:module-changed", () => this._refreshDynamicTitles(editorEl));
 
         const restoredHeight = localStorage.getItem(heightKey);
         if (restoredHeight) editorEl.style.height = `${restoredHeight}px`;
@@ -312,16 +312,17 @@ class NotesModule {
      *  their displayed text against the target's CURRENT title/value, so
      *  a stale rename or edited primary field doesn't linger in old notes.
      *  Runs once per render (on load), not on every keystroke. */
-    async _refreshDynamicTitles(editorEl, projectId) {
+    _refreshDynamicTitles(editorEl) {
+        const flat_modules = Utils.flattenModules(project._modules);
         const dynamic = [...editorEl.querySelectorAll(".notes-link")]
             .map(el => ({ el, payload: decodeModuleLinkToken(el.dataset.token) }))
             .filter(x => x.payload && x.payload.title == null);
         if (!dynamic.length) return;
 
-        const allModules = await Utils.fetchProjectModules(projectId);
+        //await Utils.fetchProjectModules(projectId);
         dynamic.forEach(({ el, payload }) => {
-            const target = allModules.find(m => m.path.join(">") === (payload.path ?? []).join(">"));
-            el.textContent = resolveLinkTitle(target, payload.extra ?? null, allModules);
+            const target = flat_modules.find(m => m.path.join(">") === (payload.path ?? []).join(">"));
+            el.textContent = resolveLinkTitle(target, payload.extra ?? null, flat_modules);
         });
     }
 
@@ -383,6 +384,7 @@ class NotesModule {
      *  contenteditable, splitting on the same <br>/element boundaries
      *  notesHtmlToPlainText uses, then scrolls it into view. */
     _jumpToLine(editorEl, lineNum) {
+        console.log("JUMP TO LINE: " + lineNum)
         const lines = [];
         let current = null;
 

@@ -21,7 +21,7 @@ class Config:
     AUTH_DIR = os.path.join(BASE_DIR, "data", "auth")
     ACCOUNTS_PATH = os.path.join(AUTH_DIR, "accounts.json")
     SESSIONS_PATH = os.path.join(AUTH_DIR, "sessions.json")
-    CAN_REGISTER = True
+    CAN_REGISTER = False
     SESSION_LIFETIME_SECONDS = 7 * 24 * 60 * 60  # sessions auto-expire after 7 days
 
     # SECRET_KEY must come from the environment. Without it, Flask signs
