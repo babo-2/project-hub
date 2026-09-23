@@ -595,6 +595,19 @@ class NotesLinkPicker {
         this._updateTitlePreview();
     }
 
+    _get_label_for_template(instance, primary, allModules){
+        if (!primary) return `Instance #${instance.id}`
+        if (primary.type=="linked_module"){
+            const payload = decodeModuleLinkToken(instance.values[primary.id]);
+            if (!payload) return `Instance #${instance.id}`
+            const target = allModules.find(m => m.path.join(">") === (payload.path ?? []).join(">"));
+            if (!target) return `Instance #${instance.id}`
+            return payload.title ?? resolveLinkTitle(target, payload.extra ?? null, allModules);
+        }else{
+            return instance.values[primary.id]
+        }
+    }
+
     /** The type-specific "what inside the module" control (see the class
      *  doc's SPECIFY_LABELS) - a select for anything with a fixed set of
      *  named items, a plain number/date input otherwise. */
@@ -614,7 +627,7 @@ class NotesLinkPicker {
         if (m.module_type === "template") {
             const fields  = m.data.fields ?? [];
             const primary = fields.find(f => f.id === m.data.primaryFieldId) ?? fields[0];
-            selectOptions(m.data.instances ?? [], i => i.id, i => (primary && i.values[primary.id]) || `Instance #${i.id}`, "");
+            selectOptions(m.data.instances ?? [], i => i.id, i => this._get_label_for_template(i, primary, this.modules), "");
 
         } else if (m.module_type === "board") {
             selectOptions(m.data.notes ?? [], n => n.id, n => n.title || (n.text || "").trim().slice(0, 40) || `Sticky #${String(n.id).slice(-4)}`, "sticky:");

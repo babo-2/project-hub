@@ -504,9 +504,7 @@ class TemplateModule {
      *  data stays live without a reload. */
     async _fetchOtherModules(projectId, excludePath) {
         //await Utils.fetchProjectModules(projectId);
-        console.log("FETCH NEW")
         const excludeKey = excludePath.join(">");
-        console.log(excludeKey)
         return Utils.flattenModules(project._modules).filter(m => m.path.join(">") !== excludeKey);
     }
 
@@ -737,7 +735,6 @@ class TemplateModule {
     _displayValue(f, val, allModules) {
         if (val === "" || val === undefined || val === null) return "—";
         
-
         switch (f.type) {
             case "checkbox":
                 return val === "true" ? "✓" : "✗";
